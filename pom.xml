@@ -7,8 +7,13 @@
   <groupId>com.zyga.app</groupId>
   <artifactId>zygaservices</artifactId>
   <version>1.0-SNAPSHOT</version>
+  <packaging>pom</packaging>
 
   <name>zygaservices</name>
+  <modules>
+    <module>customer</module>
+    <module>fraude</module>
+  </modules>
   <!-- FIXME change it to the project's website -->
 <!--  <url>http://www.example.com</url>-->
 
