@@ -2,13 +2,16 @@ package com.zyga.customer;
 
 import com.zyga.fraudClient.FraudCheckResponse;
 import com.zyga.fraudClient.FraudClient;
+import com.zyga.fraudClient.NotificationClient;
+import com.zyga.fraudClient.NotificationRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
 public record CustomerService(CustomerRepo customerRepo,
                               RestTemplate restTemplate,
-                              FraudClient fraudClient) {
+                              FraudClient fraudClient ,
+                              NotificationClient notificationClient) {
     public void regiseterCustomer(CustomerRegistrationRequest request) {
         Customer customer = Customer.builder()
                 .firstName(request.firstName())
@@ -24,6 +27,14 @@ public record CustomerService(CustomerRepo customerRepo,
             throw new IllegalStateException("fraudter");
         }
         customerRepo.save(customer);
+        notificationClient.sendNotification(
+                new NotificationRequest(
+                        customer.getId(),
+                        customer.getEmail(),
+                        String.format("Hi %s, welcome to zygaGym...",
+                                customer.getFirstName())
+                )
+        );
     }
 
 }
