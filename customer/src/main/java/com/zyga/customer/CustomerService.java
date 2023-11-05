@@ -1,5 +1,6 @@
 package com.zyga.customer;
 
+import com.zyga.amqp.RabbitMQMessageProducer;
 import com.zyga.fraudClient.FraudCheckResponse;
 import com.zyga.fraudClient.FraudClient;
 import com.zyga.fraudClient.NotificationClient;
@@ -11,7 +12,8 @@ import org.springframework.web.client.RestTemplate;
 public record CustomerService(CustomerRepo customerRepo,
                               RestTemplate restTemplate,
                               FraudClient fraudClient ,
-                              NotificationClient notificationClient) {
+                              NotificationClient notificationClient,
+                              RabbitMQMessageProducer producer) {
     public void regiseterCustomer(CustomerRegistrationRequest request) {
         Customer customer = Customer.builder()
                 .firstName(request.firstName())
@@ -27,14 +29,16 @@ public record CustomerService(CustomerRepo customerRepo,
             throw new IllegalStateException("fraudter");
         }
         customerRepo.save(customer);
-        notificationClient.sendNotification(
-                new NotificationRequest(
-                        customer.getId(),
-                        customer.getEmail(),
-                        String.format("Hi %s, welcome to zygaGym...",
-                                customer.getFirstName())
-                )
+        NotificationRequest notificationRequest =  new NotificationRequest(
+                customer.getId(),
+                customer.getEmail(),
+                String.format("Hi %s, welcome to zygaGym...",
+                        customer.getFirstName())
         );
+
+        producer.publish(notificationRequest,
+                "internal.exchange",
+                "internal.notification.routing-key");
     }
 
 }

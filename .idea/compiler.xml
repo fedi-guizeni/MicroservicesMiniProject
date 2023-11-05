@@ -11,6 +11,7 @@
         <module name="apigw" />
         <module name="fraude" />
         <module name="clients" />
+        <module name="amqp" />
         <module name="eureka-server" />
         <module name="customer" />
       </profile>
